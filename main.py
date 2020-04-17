@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from datetime import datetime
 import csv
 import os
 import re
@@ -19,7 +20,6 @@ def get_soup(url: str, page_name: str) -> BeautifulSoup:
     assert result.status_code == 200, f"Status code {result.status_code} returned."
     source = result.text
     soup = BeautifulSoup(source, 'html.parser')
-    # print(soup.prettify())
     return soup
 
 
@@ -153,10 +153,95 @@ def get_event_log() -> None:
     data_frame['Event Log'] = events
 
 
+def convert_uptime() -> None:
+    """Converts 'Up Time' value string into seconds integer"""
+    uptime_regex = r'(?P<days>\d*) days (?P<hours>\d*)h:(?P<minutes>\d*)m:(?P<seconds>\d*)s'
+    uptime_matches = re.match(uptime_regex, data_frame['Up Time'])
+    uptime = int(uptime_matches['days']) * 86400
+    uptime += int(uptime_matches['hours']) * 3600
+    uptime += int(uptime_matches['minutes']) * 60
+    uptime += int(uptime_matches['seconds'])
+    data_frame['Up Time'] = uptime
+
+
+def convert_downstream_data() -> None:
+    for channel in data_frame['Downstream Channels']:
+        for field in ['Channel', 'Channel ID', 'Corrected', 'Uncorrectables']:
+            channel[field] = int(channel[field])
+
+        field, regex = 'Frequency', r'(\d*) Hz'
+        match = re.match(regex, channel[field])
+        channel[field] = int(match.group(1)) // 1_000_000
+
+        field, regex = 'Power', r'(\d*\.\d*) dBmV'
+        match = re.match(regex, channel[field])
+        channel[field] = float(match.group(1))
+
+        field, regex = 'SNR', r'(\d*\.\d*) dB'
+        match = re.match(regex, channel[field])
+        channel[field] = float(match.group(1))
+
+
+def convert_upstream_data() -> None:
+    for channel in data_frame['Upstream Channels']:
+        for field in ['Channel', 'Channel ID']:
+            channel[field] = int(channel[field])
+
+        field, regex = 'Symbol Rate', r'(\d*) Ksym/sec'
+        match = re.match(regex, channel[field])
+        channel[field] = int(match.group(1))
+
+        field, regex = 'Frequency', r'(\d*) Hz'
+        match = re.match(regex, channel[field])
+        channel[field] = float(match.group(1)) / 1_000_000
+
+        field, regex = 'Power', r'(\d*\.\d*) dBmV'
+        match = re.match(regex, channel[field])
+        channel[field] = float(match.group(1))
+
+
+def convert_events() -> None:
+    for event in data_frame['Event Log']:
+        field, time_format = 'Time', '%c'
+        if event[field] == 'Time Not Established':
+            event[field] = datetime(1970, 1, 1)
+        else:
+            event[field] = datetime.strptime(event[field], time_format)
+
+        field, regex = 'Priority', r'(\d)'
+        match = re.search(regex, event[field])
+        event[field] = int(match.group(1))
+
+
+def convert_data() -> None:
+    """Converts data_frame values to their proper data type"""
+    convert_uptime()
+    convert_downstream_data()
+    convert_upstream_data()
+    convert_events()
+
+
+def display_data() -> None:
+    priorities = [
+        '000-Destruct-0',
+        'Emergency',
+        'Alert',
+        'Critical',
+        'Error',
+        'Warning',
+        'Notice',
+        'Information',
+        'Debug'
+    ]
+
+    [print(f"{key}: {value}") for key, value in data_frame.items()]
+
+
 if __name__ == '__main__':
     data_frame = {}
     get_product_information()
     get_addresses()
     get_status()
     get_event_log()
-    [print(f"{key}: {value}") for key, value in data_frame.items()]
+    convert_data()
+    display_data()
