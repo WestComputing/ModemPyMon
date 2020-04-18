@@ -1,3 +1,4 @@
+from api_key import api_key
 from bs4 import BeautifulSoup
 from datetime import datetime
 from datetime import timedelta
@@ -5,7 +6,6 @@ import csv
 import os
 import re
 import requests
-import openweather
 
 sb6183 = {
     "product information": "http://192.168.100.1/RgSwInfo.asp",
@@ -164,6 +164,7 @@ def convert_uptime() -> None:
     uptime += int(uptime_matches['minutes']) * 60
     uptime += int(uptime_matches['seconds'])
     data_frame['Up Time'] = uptime
+    data_frame['Time'] = datetime.now().replace(microsecond=0)
 
 
 def convert_downstream_data() -> None:
@@ -260,6 +261,12 @@ def display_data() -> None:
               f" {channel['Symbol Rate']:>5} K/s"
               f" {channel['Power']:>5} dBmV")
 
+    print(f"\n{data_frame['Time']} "
+          f"Temperature: {data_frame['Weather']['Temperature']}"
+          f" Humidity: {data_frame['Weather']['Humidity']}"
+          f" Feels Like: {data_frame['Weather']['Feels Like']}"
+          f" {data_frame['Weather']['Description']}")
+
     uptime = timedelta(seconds=data_frame['Up Time'])
     uptime_since = datetime.now().replace(microsecond=0) - uptime
     print(f"\n{uptime_since} online start ({uptime} uptime)")
@@ -269,11 +276,34 @@ def display_data() -> None:
               f" {event['Description'].split(';')[0]}")
 
 
+def convert_temp(degrees_k: float) -> int:
+    return int((degrees_k - 273.15) * 9 / 5 + 32)
+
+
+def get_weather(city_id: int) -> None:
+    """
+    Fetches open weather data by city id
+    :type city_id: int
+    """
+    url = f'http://api.openweathermap.org/data/2.5/weather?id={str(city_id)}&appid={api_key}'
+    response = requests.get(url)
+    openwx = response.json()
+    if openwx['cod'] == 200:
+        wx = {
+            'Temperature': convert_temp(openwx['main']['temp']),
+            'Feels Like': convert_temp(openwx['main']['feels_like']),
+            'Humidity': openwx['main']['humidity'],
+            'Description': openwx['weather'][0]['description']
+        }
+        data_frame['Weather'] = wx
+
+
 if __name__ == '__main__':
     data_frame = {}
     get_product_information()
     get_addresses()
     get_status()
     get_event_log()
+    get_weather(4478715)
     convert_data()
     display_data()
