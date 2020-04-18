@@ -5,6 +5,7 @@ import csv
 import os
 import re
 import requests
+import openweather
 
 sb6183 = {
     "product information": "http://192.168.100.1/RgSwInfo.asp",
