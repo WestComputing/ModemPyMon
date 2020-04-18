@@ -277,22 +277,18 @@ def display_data() -> None:
               f" {event['Description'].split(';')[0]}")
 
 
-def convert_temp(degrees_k: float) -> int:
-    return int((degrees_k - 273.15) * 9 / 5 + 32)
-
-
 def get_weather(city_id: int) -> None:
     """
     Fetches open weather data by city id
     :type city_id: int
     """
-    url = f'http://api.openweathermap.org/data/2.5/weather?id={str(city_id)}&appid={api_key}'
+    url = f'http://api.openweathermap.org/data/2.5/weather?id={str(city_id)}&appid={api_key}&units=imperial'
     response = requests.get(url)
     openwx = response.json()
     if openwx['cod'] == 200:
         wx = {
-            'Temperature': convert_temp(openwx['main']['temp']),
-            'Feels Like': convert_temp(openwx['main']['feels_like']),
+            'Temperature': round(openwx['main']['temp']),
+            'Feels Like': round(openwx['main']['feels_like']),
             'Humidity': openwx['main']['humidity'],
             'Description': openwx['weather'][0]['description']
         }

@@ -8,7 +8,7 @@ def fetch(city_id: int) -> dict:
     Fetches open weather data by city id
     :type city_id: int
     """
-    url = f'http://api.openweathermap.org/data/2.5/weather?id={str(city_id)}&appid={api_key}'
+    url = f'http://api.openweathermap.org/data/2.5/weather?id={str(city_id)}&appid={api_key}&units=imperial'
     requests_response = requests.get(url)
     response = requests_response.json()
     return response

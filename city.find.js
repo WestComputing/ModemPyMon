@@ -19,8 +19,8 @@ function calculate_range(latA, lonA, latB, lonB) {
     return Number(d.toFixed(2));
 }
 
-const myLat = 36.189909;
-const myLon = -79.694741;
+const myLat = 36;
+const myLon = -79;
 const myRanges = [];
 
 const rawData = fs.readFileSync(CITY_DATA_FILENAME, 'utf8');
