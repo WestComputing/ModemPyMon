@@ -236,6 +236,7 @@ def display_data() -> None:
         'Information',
         'Debug'
     ]
+    print()
     for field in status_fields:
         print(f"{field:>30}: {data_frame[field][0]} {data_frame[field][1]}")
     print(f"{data_frame['Software Version']}"
@@ -244,19 +245,19 @@ def display_data() -> None:
     print("\nDownstream Channels:")
     for channel in data_frame['Downstream Channels']:
         print(f"{channel['Channel']:02}:{channel['Channel ID']:02}"
-              f" {channel['Lock Status']:10}"
-              f" {channel['Modulation']:8}"
+              f" {channel['Lock Status']:^10}"
+              f" {channel['Modulation']:^8}"
               f" {channel['Frequency']:>5} MHz"
               f" {channel['SNR']:>6} dB"
               f" {channel['Power']:>5} dBmV"
-              f" {channel['Corrected']:>9}"
-              f" {channel['Uncorrectables']:>9}")
+              f" {channel['Corrected']:>9,}"
+              f" {channel['Uncorrectables']:>9,}")
 
     print("\nUpstream Channels:")
     for channel in data_frame['Upstream Channels']:
         print(f" {channel['Channel']}:{channel['Channel ID']} "
-              f" {channel['Lock Status']:10}"
-              f" {channel['US Channel Type']:8}"
+              f" {channel['Lock Status']:^10}"
+              f" {channel['US Channel Type']:^8}"
               f" {channel['Frequency']:>5} MHz"
               f" {channel['Symbol Rate']:>5} K/s"
               f" {channel['Power']:>5} dBmV")
@@ -269,10 +270,10 @@ def display_data() -> None:
 
     uptime = timedelta(seconds=data_frame['Up Time'])
     uptime_since = datetime.now().replace(microsecond=0) - uptime
-    print(f"\n{uptime_since} online start ({uptime} uptime)")
-    print("Event Log:")
+    print(f"{uptime_since} online start ({uptime} uptime)")
+    print("\nEvent Log:")
     for event in data_frame['Event Log']:
-        print(f"{event['Time']} {priorities[event['Priority']]:11}"
+        print(f"{event['Time']} {priorities[event['Priority']]:^11}"
               f" {event['Description'].split(';')[0]}")
 
 
