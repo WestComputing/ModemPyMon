@@ -234,12 +234,10 @@ def display_data() -> None:
         'Information',
         'Debug'
     ]
-    uptime = datetime.now() - timedelta(seconds=data_frame['Up Time'])
-    print(f"\nOnline since {uptime}")
-    print(f"{data_frame['Standard Specification Compliant']}")
-    print(f"{data_frame['Software Version']}")
     for field in status_fields:
-        print(f"{field:>29}: {data_frame[field][0]} {data_frame[field][1]}")
+        print(f"{field:>30}: {data_frame[field][0]} {data_frame[field][1]}")
+    print(f"{data_frame['Software Version']}"
+          f" {data_frame['Standard Specification Compliant']}")
 
     print("\nDownstream Channels:")
     for channel in data_frame['Downstream Channels']:
@@ -261,10 +259,13 @@ def display_data() -> None:
               f" {channel['Symbol Rate']:>5} K/s"
               f" {channel['Power']:>5} dBmV")
 
-    print("\nEvent Log:")
+    uptime = timedelta(seconds=data_frame['Up Time'])
+    uptime_since = datetime.now().replace(microsecond=0) - uptime
+    print(f"\n{uptime_since} online start ({uptime} uptime)")
+    print("Event Log:")
     for event in data_frame['Event Log']:
         print(f"{event['Time']} {priorities[event['Priority']]:11}"
-              f" {event['Description']}")
+              f" {event['Description'].split(';')[0]}")
 
 
 if __name__ == '__main__':
