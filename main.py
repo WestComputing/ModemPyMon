@@ -1,4 +1,4 @@
-from weather.api_key import api_key
+from weather.configuration import api_key
 from bs4 import BeautifulSoup
 from datetime import datetime
 from datetime import timedelta

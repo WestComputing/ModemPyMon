@@ -1,5 +1,5 @@
 import requests
-from weather.api_key import api_key
+from weather.configuration import api_key
 from weather.city_find import find_nearest_city
 
 
