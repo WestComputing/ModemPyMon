@@ -1,11 +1,11 @@
 import requests
-
-from api_key import api_key
+from weather.api_key import api_key
+from weather.city_find import find_nearest_city
 
 
 def fetch(city_id: int) -> dict:
     """
-    Fetches open weather data by city id
+    Fetches open weather map data by city id
     :type city_id: int
     """
     url = f'http://api.openweathermap.org/data/2.5/weather?id={str(city_id)}&appid={api_key}&units=imperial'
@@ -15,9 +15,7 @@ def fetch(city_id: int) -> dict:
 
 
 if __name__ == '__main__':
-    MCLEANSVILLE_NC = 4478715
-    GREENSBORO_NC = 4469146
-    GUILFORD_COUNTY_NC = 4469393
-    open_weather_city_id = MCLEANSVILLE_NC
+    # MCLEANSVILLE_NC = 4478715
+    open_weather_city_id = find_nearest_city()
     wx_data = fetch(open_weather_city_id)
     print(wx_data)

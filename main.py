@@ -1,9 +1,7 @@
-from api_key import api_key
+from weather.api_key import api_key
 from bs4 import BeautifulSoup
 from datetime import datetime
 from datetime import timedelta
-import csv
-import os
 import re
 import requests
 
@@ -262,11 +260,11 @@ def display_data() -> None:
               f" {channel['Symbol Rate']:>5} K/s"
               f" {channel['Power']:>5} dBmV")
 
-    print(f"\n{data_frame['Time']} "
-          f"Temperature: {data_frame['Weather']['Temperature']}"
-          f" Humidity: {data_frame['Weather']['Humidity']}"
-          f" Feels Like: {data_frame['Weather']['Feels Like']}"
-          f" {data_frame['Weather']['Description']}")
+    print(f"\n{data_frame['Time']}"
+          f" Temperature: {data_frame['weather']['Temperature']}"
+          f" Humidity: {data_frame['weather']['Humidity']}"
+          f" Feels Like: {data_frame['weather']['Feels Like']}"
+          f" {data_frame['weather']['Description']}")
 
     uptime = timedelta(seconds=data_frame['Up Time'])
     uptime_since = datetime.now().replace(microsecond=0) - uptime
@@ -292,11 +290,23 @@ def get_weather(city_id: int) -> None:
             'Humidity': openwx['main']['humidity'],
             'Description': openwx['weather'][0]['description']
         }
-        data_frame['Weather'] = wx
+        data_frame['weather'] = wx
+
+
+def get_model() -> str:
+    url = 'http://192.168.100.1'
+    soup = get_soup(url, 'model number')
+    model = soup.find(id='thisModelNumberIs').text
+    print(f'Found {model}.')
+    if model == 'SB6183':
+        return model
+    else:
+        return f'Unknown model: {model}'
 
 
 if __name__ == '__main__':
     data_frame = {}
+    get_model()
     get_product_information()
     get_addresses()
     get_status()
